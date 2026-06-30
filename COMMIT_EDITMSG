@@ -1,0 +1,13 @@
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# On branch main
+# Your branch is up to date with 'origin/main'.
+#
+# Changes to be committed:
+#	modified:   Main.py
+#	new file:   outputs/01_beans_trend.png
+#	new file:   outputs/02_beans_by_element.png
+#	new file:   outputs/03_correlation.png
+#
