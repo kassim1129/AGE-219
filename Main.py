@@ -1,34 +1,32 @@
 import pandas as pd
+import os
 
-print("=== Beans Production Data Analysis ===\n")
+print("=== Re-running Cleaning ===\n")
 
-# Load cleaned data
-df = pd.read_csv('data/cleaned_beans_data.csv')
+DATA_DIR = 'data/'
+OUTPUT_FILE = 'data/cleaned_beans_data.csv'
 
-# Filter Beans only
-if 'Item' in df.columns:
-    df_beans = df[df['Item'].str.contains('Bean', case=False, na=False)].copy()
-    print(f"Found Beans data: {len(df_beans)} rows")
-else:
-    df_beans = df.copy()
-    print("Using all data")
+csv_files = [f for f in os.listdir(DATA_DIR) if f.endswith('.csv')]
+print(f"Found {len(csv_files)} files")
 
-print("\nAvailable Columns:", df_beans.columns.tolist())
+dfs = []
+for file in csv_files:
+    df = pd.read_csv(os.path.join(DATA_DIR, file))
+    df['source_file'] = file
+    dfs.append(df)
 
-print("\n=== Summary Statistics ===")
-print(df_beans.describe())
+merged = pd.concat(dfs, ignore_index=True)
 
-print("\n=== Average Value by Year ===")
-if 'Year' in df_beans.columns:
-    yearly = df_beans.groupby('Year')['Value'].mean()
-    print(yearly)
+# Filter years
+if 'Year' in merged.columns:
+    merged['Year'] = pd.to_numeric(merged['Year'], errors='coerce')
+    merged = merged[(merged['Year'] >= 2015) & (merged['Year'] <= 2024)]
 
-print("\n=== Average Value by Area ===")
-if 'Area' in df_beans.columns:
-    print(df_beans.groupby('Area')['Value'].mean())
+# Cleaning
+numeric_cols = merged.select_dtypes(include=['number']).columns
+merged[numeric_cols] = merged[numeric_cols].fillna(merged[numeric_cols].median())
 
-print("\n=== Average Value by Element ===")
-if 'Element' in df_beans.columns:
-    print(df_beans.groupby('Element')['Value'].mean())
-
-print("\n✅ Analysis completed. Data looks good!")
+merged.to_csv(OUTPUT_FILE, index=False)
+print(f"✅ Cleaned file saved: {OUTPUT_FILE}")
+print("Number of rows:", len(merged))
+print("Columns:", merged.columns.tolist())
